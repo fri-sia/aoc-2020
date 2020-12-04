@@ -2,9 +2,12 @@
 
 echo $1.fs
 
-while inotifywait -e close_write $1.fs; do 
-        echo "test"
-        #fsharpc $1.fs
-        #touch output
-        #mono $1.exe
+while true; do 
+        inotifywait -e close_write $1.fs;
+        echo ""
+        echo "detected file change..."
+        fsharpc $1.fs > /dev/null
+        echo ""
+        mono $1.exe
+        echo ""
 done
