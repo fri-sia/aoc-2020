@@ -72,7 +72,7 @@ module Day8 =
             System.IO.File.ReadLines("./input/day8.input")
             |> Seq.map parseInstruction
             |> Array.ofSeq
-        let initialState = 
+        let initialState =
             { Accumulator  = 0; VisitedInstructions = Set.empty;
               StackPointer = 0; ChangedInstruction  = false }
         let s = runProgram program initialState
