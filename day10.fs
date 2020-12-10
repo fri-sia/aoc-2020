@@ -2,6 +2,7 @@ namespace AOC
 
 open System.IO
 open System.Linq
+open System.Diagnostics
 
 module Day10 =
     let readInput =
@@ -66,7 +67,12 @@ module Day10 =
         let jolts = readInput
         let chain = makeChain jolts
         part1 chain
+        
+        let timer = new Stopwatch()
+        timer.Start()
         let combinations = part2 chain
-        printfn "Combinations: %A" combinations
-        printfn "n: %i" (Seq.fold (fun acc n -> acc * int64(n)) 1L combinations)
+        let n = (Seq.fold (fun acc n -> acc * int64(n)) 1L combinations)
+        timer.Stop()
+        printfn "n: %i" n
+        printfn "time: %i" (timer.ElapsedMilliseconds)
         0
