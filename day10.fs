@@ -6,7 +6,7 @@ open System.Diagnostics
 
 module Day10 =
     let readInput =
-        System.IO.File.ReadLines("./input/day10.input")
+        System.IO.File.ReadLines("./input/short_day10.input")
         |> Seq.map int
         |> Seq.append (Seq.singleton 0)
         |> Seq.sort
@@ -61,13 +61,38 @@ module Day10 =
         let groups = splitBy (fun x -> x = 3) chain
         Seq.map countPathsInGroup groups
 
+    let reach (a,b,c) =
+        if a + b + c < 4
+        then 3
+        else
+            if b + c < 4
+            then 2
+            else 1
+
+    // testing a different method
+    let part2hyper chain =
+        let tri = ref (3,3,3)
+        let waysToReach =
+            seq {for elem in chain ->
+                 let (a,b,c) = !tri
+                 let v = reach (a,b,c)
+                 tri := (b,c,elem)
+                 v }
+        for v in waysToReach do
+            printfn "%A" v
+
+        let s =
+            waysToReach
+            |> Seq.fold (fun acc n -> acc * int64(n)) 1L
+        s
+
 
     [<EntryPoint>]
     let main args =
         let jolts = readInput
         let chain = makeChain jolts
         part1 chain
-        
+
         let timer = new Stopwatch()
         timer.Start()
         let combinations = part2 chain
@@ -75,4 +100,6 @@ module Day10 =
         timer.Stop()
         printfn "n: %i" n
         printfn "time: %i" (timer.ElapsedMilliseconds)
+        let nn = part2hyper chain
+        printfn "n: %i" nn
         0
