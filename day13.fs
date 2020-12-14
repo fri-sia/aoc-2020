@@ -5,11 +5,12 @@ open System.IO
 module Day13 =
     let parseFactors (factors: string) =
         factors.Split(",")
-        |> Seq.filter (not << (fun x -> x = "x"))
-        |> Seq.map int
+        |> Seq.zip (seq { 0..1000 })
+        |> Seq.filter (not << (fun (n, s) -> s = "x"))
+        |> Seq.map (fun (idx, s) -> (idx, bigint(int(s))))
 
     let readInput =
-        let lines =  System.IO.File.ReadLines("./input/day13.input")
+        let lines =  System.IO.File.ReadLines("./input/short_day13.input")
                   |> List.ofSeq
         match lines with
             | [ start; factors ] ->
@@ -24,8 +25,6 @@ module Day13 =
 
     [<EntryPoint>]
     let main args =
-        let (start, factors) = readInput
-        let (minutesWaited, busId) = earliestDeparture factors start
-        printfn "%A" (minutesWaited, busId)
-        printfn "Product: %i" (minutesWaited * busId)
+        let (_, factors) = readInput
+        printfn "%A" factors
         0
