@@ -2,7 +2,7 @@ namespace AOC
 
 open System.IO
 
-type MaskValue = AlwaysOn | AlwaysOff
+type MaskValue = AlwaysOn | AlwaysOff | Floating
 type Instruction = ChangeMask of List<int32 * MaskValue> | WriteReg of int64 * int64
 type State = State of Map<int64, int64> * List<int32 * MaskValue>
 
@@ -11,8 +11,8 @@ module Day14 =
         let s = seq {for idx in 0..35 do
                      match m.[idx] with
                      | '1' -> yield (35-idx, AlwaysOn)
-                     | '0' -> yield (35-idx, AlwaysOff)
-                     | _ -> () }
+                     | 'X' -> yield (35-idx, Floating)
+                     | _ -> ()}
         List.ofSeq s
 
     let parseLine (line: string) =
@@ -30,28 +30,39 @@ module Day14 =
         System.IO.File.ReadLines("./input/day14.input")
         |> Seq.map parseLine
 
-    let rec maskNumber (mask: List<int32 * MaskValue>) (n: int64) : int64 =
+    let rec maskNumber (mask: List<int32 * MaskValue>) (n: int64) =
         match mask with
-            | [] -> n
+            | [] -> seq { yield n }
             | (idx, AlwaysOn) :: rest ->
-                maskNumber rest (n ||| (1L <<< idx))
-            | (idx, AlwaysOff) :: rest ->
-                maskNumber rest (n &&& ~~~(1L <<< idx))
+                let next = maskNumber rest n
+                next
+                |> Seq.map (fun n -> n ||| (1L <<< idx))
+            | (idx, Floating) :: rest ->
+                seq { for x in maskNumber rest n do
+                      for y in [ x &&& ~~~(1L <<< idx); x ||| (1L <<< idx)] do
+                      yield y }
+            | _ :: rest ->
+                maskNumber rest n
 
     let updateState (State(regs, mask)) instr =
         match instr with
             | ChangeMask m -> State (regs, m)
             | WriteReg(reg, v) ->
-                let maskedV = maskNumber mask v
-                State (Map.add reg maskedV regs, mask)
+                let maskedReg = maskNumber mask reg
+                let newRegs =
+                    Seq.fold (fun m r -> Map.add r v m) regs maskedReg
+                State (newRegs, mask)
 
     [<EntryPoint>]
     let main args =
-        printfn "test"
         let prog = readInput
         let state = State (Map.empty, [])
+        for instr in prog do
+            printfn "%A" instr
         let (regs, m) = match Seq.fold updateState state prog with
                           | State (a,b) -> (a,b)
+        for reg in regs do
+            printfn "%A" reg
         let sum =
             regs
             |> Map.toSeq
