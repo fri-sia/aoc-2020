@@ -3,3 +3,7 @@
 a.out
 day15_dmzda.py
 rsday15
+hsday15
+*.o
+*.a
+*.hi
